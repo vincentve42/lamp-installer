@@ -11,6 +11,12 @@ read -sp "Choose Your System OS : " os;
 
 echo "";
 
+if [ $os -eq 1 | 2 | 3 ]; then
+    echo "Selecting $os";
+else
+    echo "You Must Choose Between 1-3"
+    break;
+fi
 clear
 
 # ubuntu lamp-installer
@@ -41,36 +47,19 @@ install_apache2(){
         ;;
 
         2)
-        sudo apt update
-
-        sudo apt install apache2
-
-        sudo ufw allow '80'
-
-        sudo ufw allow '443'
-
-        sudo ufw allow '8080'
-
-        systemctl start apache2
         
-        clear
+        pacman -Syu
+
+        pacman -S apache
+
+        systemctl start httpd
+
         ;;
+
         3)
-        sudo apt update
-
-        sudo apt install apache2
-
-        sudo ufw allow '80'
-
-        sudo ufw allow '443'
-
-        sudo ufw allow '8080'
-
-        systemctl start apache2
         
-        clear
-        ;;
 
+        ;;
     esac
 
     if [ $? -ne 0 ]; then
@@ -84,21 +73,29 @@ install_apache2(){
 
 install_php(){
 
+    
     case $os in 
         1)
-        
-        clear
-
-        echo "Select PHP Version to Install 8.x";
-
-        read -sp "Select Custom PHP Version [y/n]" custom_php;
 
         sudo apt-get update
 
-        sudo apt-get install php8.4
+        clear
+
+        sudo apt install phpmyadmin php-mbstring php-zip php-gd php-json php-curl
         
         clear
         
+        ;;
+        2)
+
+        pacman -Syu
+
+        clear
+
+        pacman -S php php-apache
+        
+
+        clear
         ;;
     esac
 
@@ -115,7 +112,48 @@ install_php(){
 
 install_mysql()
 {
-    sudo apt-get update
+    case $os in 
+        1)
+        
+        sudo apt-get update
+
+        clear
+
+        sudo apt install mysql-server
+        sudo systemctl start mysql.service
+        sudo mysql
+        
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456789';
+        exit
+        clear
+        
+        ;;
+        2)
+
+        pacman -Syu
+
+        clear
+
+        pacman -S mariadb
+
+        mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+
+        systemctl enable --now mariadb
+
+        mysql --protocol=socket #run this command as root (e.g. prefixed with sudo)
+
+        CREATE USER 'root'@'localhost' IDENTIFIED BY '123456789';
+
+        clear
+
+        ;;
+    esac
+
+    if [ $? -ne 0 ]; then
+        echo "Error : Failed To Install Mysql";
+    else
+        echo "Successfully installed Mysql";
+    fi
 
 }
 
@@ -123,14 +161,40 @@ install_mysql()
 
 install_phpmyadmin()
 {
-    sudo apt-get update
+    clear
+    
+     case $os in 
+        1)
+
+        sudo apt-get update
+
+        sudo apt-get install phpmyadmin
+
+        mysql -u root -p
+
+        UNINSTALL COMPONENT "file://component_validate_password";
+        clear
+
+        ;;
+        2)
+
+        pacman -Syu
+
+        pacman -S phpmyadmin
+        ;;
+
+
+    esac
 }
 
 #install all
 
 install_all()
 {
-    sudo apt-get update
+    install_php
+    install_apache2
+    install_mysql
+    install_phpmyadmin
 }
 
 # installer
@@ -162,10 +226,13 @@ while [ true ]; do
         install_php
     elif [ $option -eq 3 ]; then 
         echo "Instaling Mysql....";
+        install_mysql
     elif [ $option -eq 4 ]; then 
         echo "Instaling Phpmyadmin....";
+        install_phpmyadmin
     elif [ $option -eq 5 ]; then 
         echo "Instaling All....";
+        install_all
     else
         echo "Exiting App.....";
         break
