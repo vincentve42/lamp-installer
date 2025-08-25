@@ -57,15 +57,25 @@ install_apache2(){
         ;;
 
         3)
-        
+
+        sudo dnf update
+
+        sudo dnf install httpd -y
+
+        sudo firewall-cmd --permanent --add-service=http
+
+        sudo firewall-cmd --permanent --add-service=https
+
+        sudo firewall-cmd --reload
 
         ;;
     esac
 
     if [ $? -ne 0 ]; then
         echo "Error : Failed To Install Apache2 ";
+        exit
     else
-        echo "Successfully installed Apache2";
+        echo "Ssudo dnf updateuccessfully installed Apache2";
     fi
 }
 
@@ -97,10 +107,19 @@ install_php(){
 
         clear
         ;;
+
+        3)
+
+        sudo dnf update
+
+        sudo dnf -y install httpd php php-cli php-php-gettext php-mbstring php-mcrypt php-mysqlnd php-pear php-curl php-gd php-xml php-bcmath php-zip
+
+        ;;
     esac
 
     if [ $? -ne 0 ]; then
         echo "Error : Failed To Install PHP";
+        exit
     else
         echo "Successfully installed PHP";
     fi
@@ -142,15 +161,27 @@ install_mysql()
 
         mysql --protocol=socket #run this command as root (e.g. prefixed with sudo)
 
-        CREATE USER 'root'@'localhost' IDENTIFIED BY '123456789';
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456789';
 
         clear
+
+        ;;
+
+        3)
+            sudo dnf install mariadb-server -y
+
+            sudo systemctl start mariadb
+
+            sudo systemctl enable mariadb
+
+            sudo mysql_secure_installation
 
         ;;
     esac
 
     if [ $? -ne 0 ]; then
         echo "Error : Failed To Install Mysql";
+        exit
     else
         echo "Successfully installed Mysql";
     fi
@@ -181,10 +212,25 @@ install_phpmyadmin()
         pacman -Syu
 
         pacman -S phpmyadmin
+
+        ;;
+
+        3)
+
+        sudo dnf update
+        
+        sudo dnf -y install phpMyAdmin
+
         ;;
 
 
     esac
+    if [ $? -ne 0 ]; then
+        echo "Error : Failed To Install Phpmyadmin ";
+        exit
+    else
+        echo "Successfully installed Phpmyadmin";
+    fi
 }
 
 #install all
