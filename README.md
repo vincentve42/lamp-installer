@@ -9,6 +9,18 @@
 <h2>Installation</h2>
 
 ```
-git clone
+git clone https://github.com/vincentve42/lamp-installer
 ```
+
+
+
+<h2>How to Run</h2>
+
+```
+cd lamp-installer
+```
+```
+bash setup.sh
+```
+
 
